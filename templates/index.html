@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Port Scanner</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='templates/styles.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clientjs/0.1.11/client.min.js"></script>
+    <script>
+        function performPortScan() {
+            // Disable the scan button while scanning
+            $('#scanButton').prop('disabled', true);
+            $('#scanResults').text('Scanning ports, please wait...');
+            // Send request to scan ports
+            $.post("/scan_ports", function(data) {
+                let open_ports = data.open_ports;
+                let results = 'No open ports were found.';
+                if (open_ports.length > 0) {
+                    results = 'The following ports are open: ' + open_ports.join(', ');
+                }
+                // Display scan results
+                $('#scanResults').text(results);
+                // Re-enable the scan button
+                $('#scanButton').prop('disabled', false);
+            });
+        }
+
+        function getClientProperties() {
+            // Initialize the ClientJS library
+            var client = new ClientJS();
+
+            // Get and display client properties
+            var properties = '';
+            properties += 'User Agent: ' + client.getUserAgent() + '<br>';
+            properties += 'Browser: ' + client.getBrowser() + '<br>';
+            properties += 'Browser Version: ' + client.getBrowserVersion() + '<br>';
+            properties += 'OS: ' + client.getOS() + '<br>';
+            properties += 'OS Version: ' + client.getOSVersion() + '<br>';
+            properties += 'Screen Resolution: ' + client.getScreenResolution() + '<br>';
+            properties += 'Color Depth: ' + client.getColorDepth() + '<br>';
+            properties += 'Language: ' + client.getLanguage() + '<br>';
+
+            // Display client properties
+            document.getElementById('clientProperties').innerHTML = properties;
+        }
+
+        // Call getClientProperties on page load
+        window.onload = function() {
+            getClientProperties();
+        };
+    </script>
+</head>
+<body>
+    <h1>Port Scanner</h1>
+    
+    <h2>Public IP Info</h2>
+    <p>Your IP address is {{ ip_address }}.</p>
+    {% if ip_info %}
+        <p>Your IP address is a public IP address.</p>
+        <p>Hostname: {{ ip_info.get('query', 'N/A') }}</p>
+        <p>DNS Name: {{ dns_name or 'N/A' }}</p>
+        <p>City: {{ ip_info.get('city', 'N/A') }}</p>
+        <p>Region: {{ ip_info.get('regionName', 'N/A') }}</p>
+        <p>Country: {{ ip_info.get('country', 'N/A') }}</p>
+        <p>Location: {{ ip_info.get('lat', 'N/A') }}, {{ ip_info.get('lon', 'N/A') }}</p>
+        <p>Organization: {{ ip_info.get('org', 'N/A') }}</p>
+        <p>Postal Code: {{ ip_info.get('zip', 'N/A') }}</p>
+        <p>Timezone: {{ ip_info.get('timezone', 'N/A') }}</p>
+        <p>ASN: {{ ip_info.get('as', 'N/A') }}</p>
+    {% else %}
+        <p>Your IP address is a private IP address.</p>
+    {% endif %}
+    
+    <h2>Port Scan</h2>
+    <p>Ports to be scanned: 22, 25, 80, 443, 445, 135, 139</p>
+    <button id="scanButton" onclick="performPortScan()">Scan Ports</button>
+    <p id="scanResults"></p>
+
+    <h2>HTTP Headers</h2>
+    <pre>{{ http_headers }}</pre>
+
+    <h2>Client Properties</h2>
+    <div id="clientProperties"></div>
+</body>
+</html>
+
