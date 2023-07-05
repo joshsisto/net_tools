@@ -1,5 +1,7 @@
 from flask import Flask, request, render_template, jsonify
 from utilities import record_ip, port_scan, is_private_ip, get_ip_info, get_dns_name
+import requests
+import ssl
 
 app = Flask(__name__)
 
@@ -31,12 +33,14 @@ def scan_ports():
 
 @app.route('/check_robots_txt', methods=['POST'])
 def check_robots_txt():
-    target_ip = request.json.get('target_ip')
+    data = request.get_json()
+    target_ip = data.get('target_ip')
     try:
         response = requests.get(f'http://{target_ip}/robots.txt')
         return {'status': 'success', 'content': response.text}
     except Exception as e:
         return {'status': 'error', 'message': str(e)}
+
 
 @app.route('/curl_ip', methods=['POST'])
 def curl_ip():
