@@ -7,7 +7,10 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    visitor_ip = request.remote_addr
+    global visitor_ip
+    http_headers = request.headers
+    x_real_ip = http_headers.get("X-Real-Ip", None)
+    visitor_ip = x_real_ip
     # Record the visitor's IP address
     record_ip(visitor_ip)
     # Check if the IP address is private or public
@@ -19,12 +22,12 @@ def index():
         # Get DNS name (reverse DNS lookup)
         dns_name = get_dns_name(visitor_ip)
     # Get HTTP headers
-    http_headers = request.headers
+
     return render_template('index.html', ip_address=visitor_ip, ip_info=ip_info, dns_name=dns_name, http_headers=http_headers)
 
 @app.route('/scan_ports', methods=['POST'])
 def scan_ports():
-    visitor_ip = request.remote_addr
+    # visitor_ip = request.remote_addr
     # Ports to scan
     ports_to_scan = [22, 25, 80, 443, 445, 135, 139]
     # Perform the port scan
