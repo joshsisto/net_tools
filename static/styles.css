@@ -1,0 +1,73 @@
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+nav {
+    background-color: #6a5acd; /* Corrected color, example purple */
+    display: flex;
+    justify-content: flex-start;
+    padding: 10px 20px;
+    color: white;
+}
+
+nav a {
+    color: white;
+    padding: 0 10px;
+    text-decoration: none;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
+.info-sections {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    padding: 20px;
+}
+
+.info-section {
+    flex: 1;
+    min-width: 250px; /* Adjust based on your content */
+    margin: 10px;
+    padding: 20px;
+    background-color: #f0f0f0; /* Light background for each section */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Optional: Adds a subtle shadow */
+}
+
+h1, h2 {
+    color: #6a5acd;
+}
+
+pre {
+    white-space: pre-wrap; /* Ensure pre-formatted text wraps */
+    word-wrap: break-word;
+}
+
+button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:disabled {
+    background-color: #ccc;
+}
+
+input, button {
+    margin: 10px 0;
+}
+
+@media (max-width: 768px) {
+    .info-sections {
+        flex-direction: column;
+    }
+}

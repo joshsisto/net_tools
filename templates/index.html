@@ -1,34 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Port Scanner</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='templates/styles.css') }}">
+    <title>Network Reconaissance</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ClientJS/0.2.1/client.min.js"></script>
     <script>
-        function performPortScan() {
-            // Disable the scan button while scanning
-            $('#scanButton').prop('disabled', true);
-            $('#scanResults').text('Scanning ports, please wait...');
-            // Send request to scan ports
-            $.post("/scan_ports", function(data) {
-                let open_ports = data.open_ports;
-                let results = 'No open ports were found.';
-                if (open_ports.length > 0) {
-                    results = 'The following ports are open: ' + open_ports.join(', ');
-                }
-                // Display scan results
-                $('#scanResults').text(results);
-                // Re-enable the scan button
-                $('#scanButton').prop('disabled', false);
-            });
-        }
-
         function getClientProperties() {
-            // Initialize the ClientJS library
             var client = new ClientJS();
-
-            // Get and display client properties
             var properties = '';
             properties += 'User Agent: ' + client.getUserAgent() + '<br>';
             properties += 'Browser: ' + client.getBrowser() + '<br>';
@@ -38,9 +17,7 @@
             properties += 'Screen Resolution: ' + window.screen.width + 'x' + window.screen.height + '<br>';
             properties += 'Color Depth: ' + client.getColorDepth() + '<br>';
             properties += 'Language: ' + client.getLanguage() + '<br>';
-
-            // Additional properties
-            properties += 'Screen DPI: ' + (window.devicePixelRatio * 96) + '<br>'; // Assumes standard DPI is 96
+            properties += 'Screen DPI: ' + (window.devicePixelRatio * 96) + '<br>';
             properties += 'WebGL: ' + (!!window.WebGLRenderingContext ? 'yes' : 'no') + '<br>';
             properties += 'Cookies Enabled: ' + (navigator.cookieEnabled ? 'yes' : 'no') + '<br>';
 
@@ -50,124 +27,47 @@
             }
             properties += 'Plugins: ' + (plugins.length > 0 ? plugins.join(', ') : 'none') + '<br>';
 
-            // Display client properties
             document.getElementById('clientProperties').innerHTML = properties;
-            }
-
-
-        // Call getClientProperties on page load
+        }
         window.onload = function() {
             getClientProperties();
         };
     </script>
 </head>
 <body>
-    <h1>Port Scanner</h1>
-    
-    <h2>Public IP Info</h2>
-    <p>Your IP address is {{ ip_address }}.</p>
-    {% if ip_info %}
-        <p>Your IP address is a public IP address.</p>
-        <p>Hostname: {{ ip_info.get('query', 'N/A') }}</p>
-        <p>DNS Name: {{ dns_name or 'N/A' }}</p>
-        <p>City: {{ ip_info.get('city', 'N/A') }}</p>
-        <p>Region: {{ ip_info.get('regionName', 'N/A') }}</p>
-        <p>Country: {{ ip_info.get('country', 'N/A') }}</p>
-        <p>Location: {{ ip_info.get('lat', 'N/A') }}, {{ ip_info.get('lon', 'N/A') }}</p>
-        <p>Organization: {{ ip_info.get('org', 'N/A') }}</p>
-        <p>Postal Code: {{ ip_info.get('zip', 'N/A') }}</p>
-        <p>Timezone: {{ ip_info.get('timezone', 'N/A') }}</p>
-        <p>ASN: {{ ip_info.get('as', 'N/A') }}</p>
-    {% else %}
-        <p>Your IP address is a private IP address.</p>
-    {% endif %}
-    
-    <h2>Port Scan</h2>
-    <p>Ports to be scanned: 22, 25, 80, 443, 445, 135, 139</p>
-    <button id="scanButton" onclick="performPortScan()">Scan Ports</button>
-    <p id="scanResults"></p>
-
-    <h2>HTTP Headers</h2>
-    <pre>{{ http_headers }}</pre>
-
-    <h2>Client Properties</h2>
-    <div id="clientProperties"></div>
-
-    <h2>Check Robots.txt</h2>
-    <input id="targetIpForRobotsTxt" type="text" placeholder="Enter target IP or domain">
-    <button onclick="checkRobotsTxt()">Check Robots.txt</button>
-    <pre id="robotsTxtResults"></pre>
-
-    <script>
-        function checkRobotsTxt() {
-            var targetIp = $('#targetIpForRobotsTxt').val();
-            $.ajax({
-                url: "/check_robots_txt",
-                method: "POST",
-                data: JSON.stringify({ target_ip: targetIp }),
-                contentType: "application/json",
-                success: function(data) {
-                    if (data.status === 'success') {
-                        $('#robotsTxtResults').text(data.content);
-                    } else {
-                        $('#robotsTxtResults').text('Error: ' + data.message);
-                    }
-                }
-            });
-        }
-    </script>
-
-    <h2>CURL IP</h2>
-    <input id="targetIpForCurl" type="text" placeholder="Enter target IP">
-    <input id="portForCurl" type="text" placeholder="Enter port">
-    <button onclick="curlIp()">CURL IP</button>
-    <pre id="curlIpResults"></pre>
-
-    <script>
-        function curlIp() {
-            var targetIp = $('#targetIpForCurl').val();
-            var port = $('#portForCurl').val();
-            $.ajax({
-                url: "/curl_ip",
-                method: "POST",
-                data: JSON.stringify({ target_ip: targetIp, port: port }),
-                contentType: "application/json",
-                success: function(data) {
-                    if (data.status === 'success') {
-                        $('#curlIpResults').text(data.content);
-                    } else {
-                        $('#curlIpResults').text('Error: ' + data.message);
-                    }
-                }
-            });
-        }
-    </script>
-
-    <h2>Get Certificate</h2>
-    <input id="targetIpForCertificate" type="text" placeholder="Enter target IP">
-    <button onclick="getCertificate()">Get Certificate</button>
-    <pre id="getCertificateResults"></pre>
-
-    <script>
-        function getCertificate() {
-            var targetIp = $('#targetIpForCertificate').val();
-            $.ajax({
-                url: "/get_certificate",
-                method: "POST",
-                data: JSON.stringify({ target_ip: targetIp }),
-                contentType: "application/json",
-                success: function(data) {
-                    if (data.status === 'success') {
-                        $('#getCertificateResults').text(data.content);
-                    } else {
-                        $('#getCertificateResults').text('Error: ' + data.message);
-                    }
-                }
-            });
-        }
-    </script>
-
-
+    <h1>Network Reconaissance</h1>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/tools">Tools</a>
+    </nav>
+    <div class="info-sections">
+        <div class="info-section">
+            <h2>Public IP Info</h2>
+            <p>Your IP address is {{ ip_address }}.</p>
+            {% if ip_info %}
+                <p>Your IP address is a public IP address.</p>
+                <p>Hostname: {{ ip_info.get('query', 'N/A') }}</p>
+                <p>DNS Name: {{ dns_name or 'N/A' }}</p>
+                <p>City: {{ ip_info.get('city', 'N/A') }}</p>
+                <p>Region: {{ ip_info.get('regionName', 'N/A') }}</p>
+                <p>Country: {{ ip_info.get('country', 'N/A') }}</p>
+                <p>Location: {{ ip_info.get('lat', 'N/A') }}, {{ ip_info.get('lon', 'N/A') }}</p>
+                <p>Organization: {{ ip_info.get('org', 'N/A') }}</p>
+                <p>Postal Code: {{ ip_info.get('zip', 'N/A') }}</p>
+                <p>Timezone: {{ ip_info.get('timezone', 'N/A') }}</p>
+                <p>ASN: {{ ip_info.get('as', 'N/A') }}</p>
+            {% else %}
+                <p>Your IP address is a private IP address.</p>
+            {% endif %}
+        </div>
+        <div class="info-section">
+            <h2>HTTP Headers</h2>
+            <pre>{{ http_headers }}</pre>
+        </div>
+        <div class="info-section">
+            <h2>Client Properties</h2>
+            <div id="clientProperties"></div>
+        </div>
+    </div>
 </body>
 </html>
-
