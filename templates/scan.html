@@ -2,13 +2,22 @@
 <html>
 <head>
     <title>Auto Scan</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h1>Auto Scan Page</h1>
-    <form action="/scan" method="post">
-        <label for="target">Enter IP address or URL:</label>
-        <input type="text" id="target" name="target" required>
-        <input type="submit" value="Start Scan">
-    </form>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/tools">Tools</a>
+        <a href="/scan">Scan</a>
+        <!-- Add other navigation links as needed -->
+    </nav>
+    <div class="info-section">
+        <h1>Auto Scan Page</h1>
+        <form action="/scan" method="post" class="form-section">
+            <label for="target">Enter IP address or URL:</label>
+            <input type="text" id="target" name="target" required>
+            <button type="submit">Start Scan</button>
+        </form>
+    </div>
 </body>
 </html>

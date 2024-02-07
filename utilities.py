@@ -14,7 +14,7 @@ def get_dns_name(ip_address):
 def record_ip(ip_address):
     try:
         # Append the IP address to the file
-        with open('ip_addresses.txt', 'a') as f:
+        with open('./logs/ip_addresses.txt', 'a') as f:
             f.write(ip_address + '\n')
         return True
     except Exception as e:

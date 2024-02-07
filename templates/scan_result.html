@@ -2,10 +2,19 @@
 <html>
 <head>
     <title>Scan Result</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h1>Scan Result</h1>
-    <pre>{{ result }}</pre> <!-- Updated for formatting -->
-    <p>Output saved to: <a href="{{ url_for('download_file', filename=filename) }}"> {{ filename }}</a> click to download</p>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/tools">Tools</a>
+        <a href="/scan">New Scan</a>
+        <!-- Add other navigation links as needed -->
+    </nav>
+    <div class="info-section">
+        <h1>Scan Result</h1>
+        <pre>{{ result }}</pre> <!-- Keeps formatting and applies your CSS -->
+        <p>Output saved to: <a href="{{ url_for('download_file', filename=filename) }}"> {{ filename }}</a> - click to download</p>
+    </div>
 </body>
 </html>
