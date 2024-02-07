@@ -9,15 +9,25 @@
         <a href="/">Home</a>
         <a href="/tools">Tools</a>
         <a href="/scan">Scan</a>
-        <!-- Add other navigation links as needed -->
     </nav>
     <div class="info-section">
         <h1>Auto Scan Page</h1>
-        <form action="/scan" method="post" class="form-section">
+        <form id="scanForm" action="/scan" method="post">
             <label for="target">Enter IP address or URL:</label>
             <input type="text" id="target" name="target" required>
             <button type="submit">Start Scan</button>
         </form>
+        <!-- Loading Indicator -->
+        <div id="loading" style="display:none;">
+            <p>Scan in progress... Please wait.</p>
+            <!-- Or use a spinner image -->
+            <img src="{{ url_for('static', filename='loading.gif') }}" alt="Loading...">
+        </div>
     </div>
+    <script>
+        document.getElementById('scanForm').onsubmit = function() {
+            document.getElementById('loading').style.display = 'block';
+        };
+    </script>
 </body>
 </html>

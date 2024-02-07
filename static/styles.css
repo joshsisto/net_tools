@@ -71,3 +71,11 @@ input, button {
         flex-direction: column;
     }
 }
+
+#loading img {
+    max-width: 100%; /* Makes the image responsive */
+    height: auto; /* Maintains the aspect ratio */
+    display: block; /* Optional: Centers the image if you use margin */
+    margin: 0 auto; /* Optional: Centers the image in its div */
+}
+

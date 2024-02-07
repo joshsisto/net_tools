@@ -5,6 +5,7 @@ import ssl
 import datetime
 import subprocess
 import os
+import json
 
 # Ensure logs/scans directory exists
 logs_dir = './logs'
@@ -33,11 +34,20 @@ def index():
 
     return render_template('index.html', ip_address=visitor_ip, ip_info=ip_info, dns_name=dns_name, http_headers=http_headers)
 
+common_ports = [
+    20, 21, 22, 23, 25, 53, 67, 68, 69, 80, 110, 111, 123, 135, 137, 138, 139, 143, 161, 162,
+    179, 389, 443, 445, 465, 500, 512, 513, 514, 530, 543, 544, 548, 554, 587, 590, 593, 636,
+    873, 989, 990, 993, 995, 1025, 1026, 1027, 1433, 1434, 1521, 1723, 2049, 2082, 2083, 2181,
+    3306, 3389, 3690, 3784, 5060, 5061, 5432, 5632, 5900, 5985, 5986, 6000, 6379, 6667, 7000,
+    8080, 8081, 8443, 8888, 9000, 9042, 9092, 9160, 9200, 9300, 11211, 27017, 27018, 27019,
+    28017
+]
+
 @app.route('/scan_ports', methods=['POST'])
 def scan_ports():
     # visitor_ip = request.remote_addr
     # Ports to scan
-    ports_to_scan = [22, 25, 80, 443, 445, 135, 139]
+    ports_to_scan = common_ports
     # Perform the port scan
     open_ports = port_scan(visitor_ip, ports_to_scan)
     return jsonify({'open_ports': open_ports})
