@@ -5,7 +5,7 @@
 </head>
 <body>
     <h1>Scan Result</h1>
-    <p>{{ result }}</p>
-    <p>Output saved to: {{ filename }}</p>
+    <pre>{{ result }}</pre> <!-- Updated for formatting -->
+    <p>Output saved to: <a href="{{ url_for('download_file', filename=filename) }}"> {{ filename }}</a> click to download</p>
 </body>
 </html>

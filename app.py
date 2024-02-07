@@ -1,10 +1,15 @@
-from flask import Flask, request, render_template, jsonify
+from flask import Flask, request, render_template, jsonify, send_from_directory
 from utilities import record_ip, port_scan, is_private_ip, get_ip_info, get_dns_name
 import requests
 import ssl
 import datetime
 import subprocess
 import os
+
+# Ensure logs/scans directory exists
+logs_dir = './logs'
+if not os.path.exists(logs_dir):
+    os.makedirs(logs_dir)
 
 app = Flask(__name__)
 
@@ -75,34 +80,35 @@ def tools():
     return render_template('tools.html', ip_address=visitor_ip)
 
 
+
 @app.route('/scan', methods=['GET', 'POST'])
 def scan():
     if request.method == 'POST':
         target = request.form['target']
-        # Your scanning script execution goes here
-        # For demonstration, let's just echo the target
+        # Assume you replace this with your actual scan command
         command = f"/home/josh/dns_abuse.sh {target}"
         process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         output, error = process.communicate()
         if process.returncode == 0:
             result = output.decode().strip()
-            # Save output to a file
             # Ensure logs/scans directory exists
-            logs_dir = './logs/scans'
             if not os.path.exists(logs_dir):
                 os.makedirs(logs_dir)
-
-            # Updated part for saving the output
+            # Save output to a file in logs/scans
             filename = f"scan_results_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.txt"
             filepath = os.path.join(logs_dir, filename)
             with open(filepath, 'w') as file:
                 file.write(result)
+            # Provide path for downloading
             return render_template('scan_result.html', result=result, filename=filename)
         else:
             return f"Error executing scan: {error.decode().strip()}"
     return render_template('scan.html')
 
 
+@app.route('/download/<filename>')
+def download_file(filename):
+    return send_from_directory(logs_dir, filename, as_attachment=True)
 
 if __name__ == '__main__':
     # Set the host parameter to '0.0.0.0' to make the application accessible from any IP address
