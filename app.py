@@ -68,9 +68,8 @@ def get_certificate():
     
 @app.route('/tools')
 def tools():
-    # You can pass any necessary data to tools.html through here.
-    # For now, it looks like we don't need to pass anything specific.
-    return render_template('tools.html')
+    global visitor_ip
+    return render_template('tools.html', ip_address=visitor_ip)
 
 if __name__ == '__main__':
     # Set the host parameter to '0.0.0.0' to make the application accessible from any IP address
