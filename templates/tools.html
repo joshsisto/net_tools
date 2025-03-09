@@ -1,25 +1,58 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Network Reconaissance - Tools</title>
+    <title>Network Reconnaissance - Tools</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         function performPortScan() {
-            // Disable the scan button while scanning
             $('#scanButton').prop('disabled', true);
-            $('#scanResults').text('Scanning ports, please wait...');
-            // Send request to scan ports
-            $.post("/scan_ports", function(data) {
-                let open_ports = data.open_ports;
-                let results = 'No open ports were found.';
-                if (open_ports.length > 0) {
-                    results = 'The following ports are open: ' + open_ports.join(', ');
+            $('#scanResults').html('Scanning ports, please wait...'); // Use .html() for richer content
+
+            var targetIp = $('#targetIpForPortScan').val();
+            var scanType = $('#scanType').val();
+            var ports = $('#customPorts').val();
+
+            $.ajax({
+                url: "/scan_ports",
+                method: "POST",
+                data: JSON.stringify({ target_ip: targetIp, scan_type: scanType, ports: ports }),
+                contentType: "application/json",
+                success: function(data) {
+                    let results = '';
+                    if (Object.keys(data.open_ports).length > 0) {
+                        results += 'Open ports for ' + data.target_ip + ':<br>';
+                        for (const port in data.open_ports) {
+                            results += `${port}: ${data.open_ports[port]}<br>`;
+                        }
+                    } else {
+                        results = 'No open ports were found.';
+                    }
+                    $('#scanResults').html(results); // Use .html()
+                },
+                error: function(xhr, status, error) {
+                    $('#scanResults').html('Error: ' + error);
+                },
+                complete: function() {
+                    $('#scanButton').prop('disabled', false);
                 }
-                // Display scan results
-                $('#scanResults').text(results);
-                // Re-enable the scan button
-                $('#scanButton').prop('disabled', false);
+            });
+        }
+
+        function checkRobotsTxt() {
+            var targetIp = $('#targetIpForRobotsTxt').val();
+            $.ajax({
+                url: "/check_robots_txt",
+                method: "POST",
+                data: JSON.stringify({ target_ip: targetIp }),
+                contentType: "application/json",
+                success: function(data) {
+                    if (data.status === 'success') {
+                        $('#robotsTxtResults').text(data.content);
+                    } else {
+                        $('#robotsTxtResults').text('Error: ' + data.message);
+                    }
+                }
             });
         }
 
@@ -50,7 +83,15 @@
                 contentType: "application/json",
                 success: function(data) {
                     if (data.status === 'success') {
-                        $('#getCertificateResults').text(data.content);
+                        let content = "Subject: " + data.content.subject + "<br>";
+                        content += "Issuer: " + data.content.issuer + "<br>";
+                        content += "Valid From: " + data.content.valid_from + "<br>";
+                        content += "Valid To: " + data.content.valid_to + "<br>";
+                        content += "Expired: " + (data.content.expired ? "Yes" : "No") + "<br>";
+                        content += "Serial Number: " + data.content.serial_number + "<br>";
+                        content += "Subject Alternative Names: " + data.content.sans.join(', ') + "<br>";
+
+                        $('#getCertificateResults').html(content); // Use .html() for multi-line
                     } else {
                         $('#getCertificateResults').text('Error: ' + data.message);
                     }
@@ -58,10 +99,81 @@
             });
         }
 
+        function performDNSLookup() {
+            var target = $('#targetForDNS').val();
+            var recordType = $('#recordType').val();
+            $.ajax({
+                url: "/dns_lookup",
+                method: "POST",
+                data: JSON.stringify({ target: target, record_type: recordType }),
+                contentType: "application/json",
+                success: function(data) {
+                    if (data.status === 'success') {
+                        $('#dnsResults').html(data.results.join('<br>')); // Use .html()
+                    } else {
+                        $('#dnsResults').text('Error: ' + data.message);
+                    }
+                }
+            });
+        }
+
+        function performWHOIS() {
+            var target = $('#targetForWHOIS').val();
+            $.ajax({
+                url: "/whois",
+                method: "POST",
+                data: JSON.stringify({ target: target }),
+                contentType: "application/json",
+                success: function(data) {
+                    if (data.status === 'success') {
+                        $('#whoisResults').text(data.results);
+                    } else {
+                        $('#whoisResults').text('Error: ' + data.message);
+                    }
+                }
+            });
+        }
+        function performTraceroute() {
+            var target = $('#targetForTraceroute').val();
+            $.ajax({
+                url: "/traceroute",
+                method: "POST",
+                data: JSON.stringify({ target: target }),
+                contentType: "application/json",
+                success: function (data) {
+                    if (data.status === 'success') {
+                        $('#tracerouteResults').text(data.results);
+                    } else {
+                        $('#tracerouteResults').text('Error: ' + data.message);
+                    }
+                }
+            });
+        }
+
+        function performHeaderAnalysis() {
+            var target = $('#targetForHeaders').val();
+             $.ajax({
+                url: "/analyze_headers",
+                method: "POST",
+                data: JSON.stringify({ target: target }),
+                contentType: "application/json",
+                success: function(data) {
+                    if (data.status === 'success') {
+                        let result = '';
+                        for (const key in data.results) {
+                            result += `${key}: ${data.results[key]}<br>`;
+                        }
+                        $('#headerAnalysisResults').html(result); // Use .html()
+                    } else {
+                        $('#headerAnalysisResults').text('Error: ' + data.message);
+                    }
+                }
+            });
+        }
     </script>
 </head>
 <body>
-    <h1>Network Reconaissance Tools</h1>
+    <h1>Network Reconnaissance Tools</h1>
 
     <nav>
         <a href="/">Home</a>
@@ -72,7 +184,14 @@
     <div class="info-sections">
         <div class="info-section">
             <h2>Port Scan</h2>
-            <p>Scan common ports of {{ ip_address }}</p>
+            <input id="targetIpForPortScan" type="text" placeholder="Enter target IP or domain">
+            <select id="scanType">
+                <option value="top_100">Top 100 Ports</option>
+                <option value="all_tcp">All TCP Ports</option>
+                <option value="udp">Common UDP Ports</option>
+                <option value="custom">Custom Ports</option>
+            </select>
+            <input id="customPorts" type="text" placeholder="Comma-separated ports (e.g., 80,443,8080)" style="display: none;">
             <button id="scanButton" onclick="performPortScan()">Scan Ports</button>
             <p id="scanResults"></p>
         </div>
@@ -91,13 +210,64 @@
             <button onclick="curlIp()">CURL IP</button>
             <pre id="curlIpResults"></pre>
         </div>
-        
+
         <div class="info-section">
             <h2>Get Certificate</h2>
-            <input id="targetIpForCertificate" type="text" placeholder="Enter target IP">
+            <input id="targetIpForCertificate" type="text" placeholder="Enter target IP or domain">
             <button onclick="getCertificate()">Get Certificate</button>
             <pre id="getCertificateResults"></pre>
         </div>
+
+        <div class="info-section">
+            <h2>DNS Lookup</h2>
+            <input id="targetForDNS" type="text" placeholder="Enter domain">
+            <select id="recordType">
+                <option value="A">A</option>
+                <option value="AAAA">AAAA</option>
+                <option value="MX">MX</option>
+                <option value="TXT">TXT</option>
+                <option value="CNAME">CNAME</option>
+                <option value="NS">NS</option>
+                <option value="SOA">SOA</option>
+                <option value="PTR">PTR</option>
+                <option value="AXFR">AXFR (Zone Transfer)</option>
+            </select>
+            <button onclick="performDNSLookup()">Lookup</button>
+            <pre id="dnsResults"></pre>
+        </div>
+
+        <div class="info-section">
+            <h2>WHOIS Lookup</h2>
+            <input id="targetForWHOIS" type="text" placeholder="Enter domain">
+            <button onclick="performWHOIS()">WHOIS Lookup</button>
+            <pre id="whoisResults"></pre>
+        </div>
+
+        <div class="info-section">
+            <h2>Traceroute</h2>
+            <input id="targetForTraceroute" type="text" placeholder="Enter target IP or domain">
+            <button onclick="performTraceroute()">Traceroute</button>
+            <pre id="tracerouteResults"></pre>
+        </div>
+
+        <div class="info-section">
+            <h2>HTTP Header Analysis</h2>
+            <input id="targetForHeaders" type="text" placeholder="Enter target IP or domain">
+            <button onclick="performHeaderAnalysis()">Analyze Headers</button>
+            <pre id="headerAnalysisResults"></pre>
+        </div>
+
     </div>
+    <script>
+        $(document).ready(function() {
+            $('#scanType').change(function() {
+                if ($(this).val() === 'custom') {
+                    $('#customPorts').show();
+                } else {
+                    $('#customPorts').hide();
+                }
+            });
+        });
+    </script>
 </body>
 </html>

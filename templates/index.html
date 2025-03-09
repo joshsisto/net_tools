@@ -1,23 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Network Reconaissance</title>
+    <title>Network Reconnaissance</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ClientJS/0.2.1/client.min.js"></script>
+
     <script>
         function getClientProperties() {
             var client = new ClientJS();
             var properties = '';
-            properties += 'User Agent: ' + client.getUserAgent() + '<br>';
-            properties += 'Browser: ' + client.getBrowser() + '<br>';
-            properties += 'Browser Version: ' + client.getBrowserVersion() + '<br>';
-            properties += 'OS: ' + client.getOS() + '<br>';
-            properties += 'OS Version: ' + client.getOSVersion() + '<br>';
-            properties += 'Screen Resolution: ' + window.screen.width + 'x' + window.screen.height + '<br>';
-            properties += 'Color Depth: ' + client.getColorDepth() + '<br>';
-            properties += 'Language: ' + client.getLanguage() + '<br>';
-            properties += 'Screen DPI: ' + (window.devicePixelRatio * 96) + '<br>';
+            properties += 'User Agent: ' + client.getUserAgent() + addCopyToClipboardButton(client.getUserAgent()) + '<br>';
+            properties += 'Browser: ' + client.getBrowser() + addCopyToClipboardButton(client.getBrowser()) + '<br>';
+            properties += 'Browser Version: ' + client.getBrowserVersion() + addCopyToClipboardButton(client.getBrowserVersion()) + '<br>';
+            properties += 'OS: ' + client.getOS() + addCopyToClipboardButton(client.getOS()) + '<br>';
+            properties += 'OS Version: ' + client.getOSVersion() + addCopyToClipboardButton(client.getOSVersion()) +'<br>';
+            properties += 'Screen Resolution: ' + window.screen.width + 'x' + window.screen.height + addCopyToClipboardButton(window.screen.width + 'x' + window.screen.height) +'<br>';
+            properties += 'Color Depth: ' + client.getColorDepth() +  addCopyToClipboardButton(client.getColorDepth()) +'<br>';
+            properties += 'Language: ' + client.getLanguage() + addCopyToClipboardButton(client.getLanguage()) +'<br>';
+            properties += 'Screen DPI: ' + (window.devicePixelRatio * 96) + addCopyToClipboardButton((window.devicePixelRatio * 96)) +'<br>';
             properties += 'WebGL: ' + (!!window.WebGLRenderingContext ? 'yes' : 'no') + '<br>';
             properties += 'Cookies Enabled: ' + (navigator.cookieEnabled ? 'yes' : 'no') + '<br>';
 
@@ -29,26 +33,62 @@
 
             document.getElementById('clientProperties').innerHTML = properties;
         }
+
+        function addCopyToClipboardButton(text) {
+            return `<button class="copy-button" onclick="copyToClipboard('${text}')">Copy</button>`;
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                console.log('Copying to clipboard was successful!');
+            }, function(err) {
+                console.error('Could not copy text: ', err);
+            });
+        }
+
+        function toggleSection(sectionId) {
+            var x = document.getElementById(sectionId);
+            if (x.style.display === "none") {
+                x.style.display = "block";
+            } else {
+                x.style.display = "none";
+            }
+        }
+
         window.onload = function() {
             getClientProperties();
+
+            // Initialize Leaflet map (if latitude and longitude are available)
+            {% if ip_info and ip_info.get('lat') and ip_info.get('lon') %}
+                var map = L.map('map').setView([{{ ip_info.get('lat') }}, {{ ip_info.get('lon') }}], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+                L.marker([{{ ip_info.get('lat') }}, {{ ip_info.get('lon') }}]).addTo(map)
+                    .bindPopup('Approximate Location of {{ ip_address }}')
+                    .openPopup();
+            {% endif %}
         };
     </script>
 </head>
 <body>
-    <h1>Network Reconaissance</h1>
+    <h1>Network Reconnaissance</h1>
     <nav>
         <a href="/">Home</a>
         <a href="/tools">Tools</a>
         <a href="/scan">Scan</a>
     </nav>
-    <div class="info-sections">
+
+     <button onclick="toggleSection('ipInfoSection')">Show/Hide IP Info</button>
+    <div class="info-sections" id="ipInfoSection">
         <div class="info-section">
             <h2>Public IP Info</h2>
-            <p>Your IP address is {{ ip_address }}.</p>
+            <p>Your IP address is {{ ip_address | safe }}</p>
             {% if ip_info %}
                 <p>Your IP address is a public IP address.</p>
-                <p>Hostname: {{ ip_info.get('query', 'N/A') }}</p>
-                <p>DNS Name: {{ dns_name or 'N/A' }}</p>
+                <p>Hostname: {{ hostname | safe }}</p>
+                <p>DNS Name: {{ dns_name | safe }}</p>
                 <p>City: {{ ip_info.get('city', 'N/A') }}</p>
                 <p>Region: {{ ip_info.get('regionName', 'N/A') }}</p>
                 <p>Country: {{ ip_info.get('country', 'N/A') }}</p>
@@ -57,14 +97,39 @@
                 <p>Postal Code: {{ ip_info.get('zip', 'N/A') }}</p>
                 <p>Timezone: {{ ip_info.get('timezone', 'N/A') }}</p>
                 <p>ASN: {{ ip_info.get('as', 'N/A') }}</p>
+                 <div id="map"></div>
             {% else %}
                 <p>Your IP address is a private IP address.</p>
             {% endif %}
         </div>
+    </div>
+
+
+    <button onclick="toggleSection('httpHeadersSection')">Show/Hide HTTP Headers</button>
+    <div class="info-sections" id="httpHeadersSection" style="display: none;">
         <div class="info-section">
             <h2>HTTP Headers</h2>
-            <pre>{{ http_headers }}</pre>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Header Name</th>
+                        <th>Header Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for header, value in http_headers.items() %}
+                    <tr {% if header in ['Strict-Transport-Security', 'Content-Security-Policy', 'X-Frame-Options', 'X-XSS-Protection', 'X-Content-Type-Options'] %}class="security-header" {% endif %}>
+                        <td>{{ header }}</td>
+                        <td>{{ value | safe }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         </div>
+    </div>
+
+     <button onclick="toggleSection('clientPropertiesSection')">Show/Hide Client Properties</button>
+    <div class="info-sections" id="clientPropertiesSection" style="display: none;">
         <div class="info-section">
             <h2>Client Properties</h2>
             <div id="clientProperties"></div>

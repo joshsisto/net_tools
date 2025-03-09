@@ -1,71 +1,118 @@
 body {
     font-family: Arial, sans-serif;
     line-height: 1.6;
-}
-
-table {
-    border-collapse: collapse;
-    width: 100%;
-    margin-bottom: 20px;
-}
-
-th {
-    background-color: lightblue;
-    padding: 10px;
-    text-align: left;
-}
-
-td {
-    padding: 10px;
-}
-
-tr:nth-child(even) {
-    background-color: #f2f2f2;
-}
-
-tr:nth-child(odd) {
-    background-color: lightgray;
-}
-
-.menu-bar {
-    background-color: lightpurple;
-    display: flex;
-    justify-content: flex-start;
-    padding: 10px 0;
-}
-
-.menu-bar a {
-    color: #333;
-    padding: 0 10px;
-    text-decoration: none;
-}
-
-.menu-bar a:hover {
-    text-decoration: underline;
+    margin: 0; /* Remove default body margin */
+    padding: 0; /* Remove default body padding */
+    background-color: #f4f4f4; /* Light gray background */
 }
 
 h1, h2 {
     color: #770cdb;
+    text-align: center; /* Center-align headings */
+}
+
+/* Table Styles (consistent and improved) */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Add a subtle shadow */
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: lightblue; /* Consistent header color */
+    color: #333; /* Dark text on light background */
+    font-weight: bold; /* Make headers bold */
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9; /* Slightly different even row color */
+}
+
+tr:nth-child(odd) {
+    background-color: #fff; /* White for odd rows */
+}
+
+/* Navigation Bar (improved) */
+nav {
+    background-color: #770cdb; /* Your purple color */
+    padding: 10px 0;
+    text-align: center; /* Center the navigation links */
+    margin-bottom: 20px; /* Add some space below the nav */
 }
 
 nav a {
-    color: #007bff;
+    color: white;
     text-decoration: none;
+    padding: 0 15px; /* More horizontal padding */
+    font-weight: bold; /* Make navigation links bold */
 }
 
-button {
+nav a:hover {
+    text-decoration: underline;
+}
+
+/* Button Styles (consistent) */
+button, input[type="submit"] { /* Style submit buttons the same */
     background-color: #007bff;
     color: white;
-    padding: 10px;
+    padding: 10px 15px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    font-size: 16px; /* Slightly larger font size */
 }
 
-button:disabled {
+button:disabled, input[type="submit"]:disabled {
     background-color: #ccc;
+    cursor: not-allowed; /* Indicate disabled state */
 }
 
-input, button {
-    margin: 10px 0;
+input[type="text"], select { /* Style text inputs and selects */
+    padding: 8px;
+    margin: 5px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 100%; /* Full width */
+    box-sizing: border-box; /* Include padding and border in the width */
+}
+.info-sections{
+    padding: 0 20px;
+}
+/* Map Style */
+#map {
+    height: 300px;
+    width: 100%;
+    border: 1px solid #ccc; /* Add a border to the map */
+    margin-bottom: 20px;
+}
+
+/* Copy Button */
+.copy-button {
+    margin-left: 5px;
+    padding: 2px 6px;
+    font-size: 12px;
+    cursor: pointer;
+    background-color: #eee; /* Light gray background */
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+/* Security Header Style */
+.security-header {
+    font-weight: bold;
+    color: #006400; /* Dark green for security headers */
+}
+.info-section{
+     margin-bottom: 20px;
+     border: 1px solid #ccc;
+     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+     padding: 10px;
+     background-color: white;
 }

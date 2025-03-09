@@ -15,12 +15,17 @@
         <form id="scanForm" action="/scan" method="post">
             <label for="target">Enter IP address or URL:</label>
             <input type="text" id="target" name="target" required>
+
+            <label for="scan_type">Select Scan Type:</label>
+            <select id="scan_type" name="scan_type">
+                <option value="custom">Custom Script</option>
+                <option value="nmap">Nmap Scan</option>
+            </select>
+
             <button type="submit">Start Scan</button>
         </form>
-        <!-- Loading Indicator -->
         <div id="loading" style="display:none;">
             <p>Scan in progress... Please wait.</p>
-            <!-- Or use a spinner image -->
             <img src="{{ url_for('static', filename='loading.gif') }}" alt="Loading...">
         </div>
     </div>
